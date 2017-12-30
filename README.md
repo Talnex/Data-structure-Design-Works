@@ -1,1 +1,1 @@
-# Data-stucture-Design-Works
+# Data-structure-Design-Works
