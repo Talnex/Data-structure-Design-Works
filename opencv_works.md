@@ -7,16 +7,18 @@
 #include <opencv2/imgproc.hpp>
 #include <highgui.h>
 #include <iostream>
+#include <math.h>
 
 using namespace cv;
 using namespace std;
 
-#define NUM 3
-#define WIDE 400
+#define NUM 5
+#define WIDE 300
 static Mat map1=imread("/Users/talnex/Downloads/map.jpg");
 static Mat mapshow;
 static Mat map1ROI;
 double scale=0.20;
+#define dynamic_num 10
 
 void MOUSE(int event,int x,int y,int flags,void* param){
     if ( event == EVENT_MOUSEMOVE )
@@ -73,18 +75,44 @@ public:
         imshow("mapshow", mapshow);
         setMouseCallback("mapshow",MOUSE,NULL);
         waitKey(0);
+        destroyWindow("mapshow");
+        destroyWindow("map1ROI");
     }
     void Dynamic_Show(){
-        
+        init();
+        int a,b;
+        Size dsize=Size(map1.cols*scale,map1.rows*scale);
+        resize(map1, mapshow, dsize,0,0,CV_INTER_AREA);
+        for (int i=0; Path[i+1]!=-1; i++) {
+            a=(Points[Path[i+1]].x-Points[Path[i]].x)/dynamic_num;
+            b=(Points[Path[i+1]].y-Points[Path[i]].y)/dynamic_num;
+            for (int j=0; j<dynamic_num; j++) {
+                line(map1,Point(Points[Path[i]].x+j*a,Points[Path[i]].y+j*b), Point(Points[Path[i]].x+(j+1)*a,Points[Path[i]].y+(j+1)*b), Scalar(0,0,255),10);
+                line(mapshow,Point((Points[Path[i]].x+j*a)*scale,(Points[Path[i]].y+j*b)*scale), Point((Points[Path[i]].x+(j+1)*a)*scale,(Points[Path[i]].y+(j+1)*b)*scale), Scalar(0,0,255),10*scale);
+                imshow("mapshow", mapshow);
+                waitKey(10);
+            }
+        }
+        setMouseCallback("mapshow",MOUSE,NULL);
+        waitKey(0);
+        destroyWindow("mapshow");
+        destroyWindow("map1ROI");
+        map1.release();
+        map1=imread("/Users/talnex/Downloads/map.jpg");
     }
-    void Show_3D(string file){
-        
+    void init(){
+        Path[0]=1;
+        Path[1]=2;
+        Path[2]=0;
+        Path[3]=-1;
+        Points[0]=Point(100,100);
+        Points[1]=Point(1000,1000);
+        Points[2]=Point(1000,100);
     }
-    
     
 private:
     int Path[NUM];//动态演示路径专用
-    int Points[NUM+1];
+    Point Points[NUM+1];
     int AllPaths[NUM][NUM+1];
     
 };
@@ -92,41 +120,9 @@ private:
 int main(){
     OPENCV opencv;
     opencv.MapShow();
+    opencv.Dynamic_Show();
     return 0;
 }
 
-//    IplImage* map=cvLoadImage("/Users/talnex/Downloads/map.jpg");
-//    IplImage* map2;
-//    CvSize size;
-//    double scale=0.22;
-//    size.width=map->width*scale;
-//    size.height=map->height*scale;
-//    map2=cvCreateImage(size, map->depth,map->nChannels);
-//    cvResize(map, map2,CV_INTER_AREA);
-//    cvNamedWindow("map");
-//    cvShowImage("map", map2);
-//    waitKey(0);
-//    cvDestroyWindow("map");
-
-
-//使用第二种方法缩放图像 CV_INTER_AREA采样方式适合去除波纹
-//http://blog.csdn.net/zxj820/article/details/50594955
-//   动态演示路径核心算法
-//    Point points[2]={Point(100,100),Point(5000,5000)};
-//    Mat map=imread("/Users/talnex/Downloads/map.jpg");
-//    Mat mapshow;
-//    double scale=0.22;
-//    Size dsize=Size(map.cols*scale,map.rows*scale);
-//    int num=50;
-//    Point a=points[0],b=points[1];
-//    for (int i=0; i<num; i++) {
-//        resize(map, mapshow, dsize,0,0,CV_INTER_AREA);
-//        imshow("map", mapshow);
-//        waitKey(1);
-//        line(map,Point(a.x,a.y),Point(a.x+(b.x-a.x)/num,a.y+(b.y-a.y)/num), Scalar(0,0,255),10);
-//        a.x=a.x+(b.x-a.x)/num;
-//        a.y=a.y+(b.y-a.y)/num;
-//    }
-//    waitKey(0);
 
 ```
